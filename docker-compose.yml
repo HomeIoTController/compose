@@ -12,9 +12,9 @@ services:
     volumes:
       - ./database/mysql:/var/lib/mysql
     restart: always
-  api:
+  graphql-api:
     build:
-      context: ../api/.
+      context: ../graphql-api/.
     links:
       - db
     depends_on:
@@ -24,19 +24,19 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ../api/server.js:/app/server.js
-      - ../api/config:/app/config
-      - ../api/data:/app/data
-      - ../api/migrations:/app/migrations
-      - ../api/models:/app/models
+      - ../graphql-api/server.js:/app/server.js
+      - ../graphql-api/config:/app/config
+      - ../graphql-api/data:/app/data
+      - ../graphql-api/migrations:/app/migrations
+      - ../graphql-api/models:/app/models
     command: npm run start
   web:
     build:
       context: ../web-client/.
     links:
-      - api
+      - graphql-api
     depends_on:
-      - api
+      - graphql-api
     environment:
       PORT: '3000'
     ports:
