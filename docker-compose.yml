@@ -67,7 +67,7 @@ services:
       DATABASE_UTILS_PATH: /resources/DatabaseUtils.props
       DEBUG_SECRET: adaptive_system
     ports:
-      - "8080:8080"
+      - "8080:8080" # For debugging
     volumes:
       - ../eeg-brainwave-api/src/main/resources/model.bin:/model/model.bin
   web:
