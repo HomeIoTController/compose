@@ -1,6 +1,6 @@
 version: '2'
 services:
-  db:
+  graphql-db:
     image: mysql:5.6
     ports:
       - '3306:3306'
@@ -10,15 +10,16 @@ services:
       MYSQL_PASSWORD: adaptive_pw
       MYSQL_DATABASE: adaptive_db
     volumes:
-      - ./database/mysql:/var/lib/mysql
+      - ./database-graphql/mysql:/var/lib/mysql
     restart: always
   graphql-api:
     build:
       context: ../graphql-api/.
     links:
-      - db
+      - graphql-db
     depends_on:
-      - db
+      - graphql-db
+      - eeg-brainwave-api
     environment:
       PORT: '3000'
     ports:
@@ -30,6 +31,36 @@ services:
       - ../graphql-api/migrations:/app/migrations
       - ../graphql-api/models:/app/models
     command: npm run start
+  eeg-db:
+    image: mysql:5.6
+    ports:
+      - '3307:3307'
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_USER: adaptive_user
+      MYSQL_PASSWORD: adaptive_pw
+      MYSQL_DATABASE: adaptive_db
+      MYSQL_TCP_PORT: 3307
+      MYSQL_UNIX_PORT: 3307
+    volumes:
+      - ./database-eeg/mysql:/var/lib/mysql
+    restart: always
+  eeg-brainwave-api:
+    build:
+      context: ../eeg-brainwave-api/.
+    links:
+      - eeg-db
+    depends_on:
+      - eeg-db
+    environment:
+      DB_HOST: eeg-db
+      DB_USERNAME: adaptive_user
+      DB_PASSWORD: adaptive_pw
+      DB_NAME: adaptive_db
+      DB_PORT: 3307
+      DEBUG_SECRET: adaptive_system
+    ports:
+      - "8080:8080"
   web:
     build:
       context: ../web-client/.
