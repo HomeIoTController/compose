@@ -58,9 +58,14 @@ services:
       DB_PASSWORD: adaptive_pw
       DB_NAME: adaptive_db
       DB_PORT: 3307
+      ENV: docker
+      MODEL_PATH: /resources/model.bin
+      DATABASE_UTILS_PATH: /resources/DatabaseUtils.props
       DEBUG_SECRET: adaptive_system
     ports:
       - "8080:8080"
+    volumes:
+      - ../eeg-brainwave-api/src/main/resources/model.bin:/model/model.bin
   web:
     build:
       context: ../web-client/.
