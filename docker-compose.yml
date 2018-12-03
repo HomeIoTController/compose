@@ -21,7 +21,11 @@ services:
       - graphql-db
       - eeg-brainwave-api
     environment:
-      PORT: '3000'
+      DB_HOST: graphql-db
+      DB_USERNAME: adaptive_user
+      DB_PASSWORD: adaptive_pw
+      DB_NAME: adaptive_db
+      DB_PORT: 3306
     ports:
       - "3000:3000"
     volumes:
