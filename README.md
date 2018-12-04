@@ -10,4 +10,4 @@
   * `docker ps`
   * `docker exec -ti 3912bba70e66 bash`
 
-* Run `docker-compose logs -f --tail 20 api web` for logs
+* Run `docker-compose logs -f --tail 20 graphql-api eeg-brainwave-api web` for logs
