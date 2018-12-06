@@ -68,8 +68,12 @@ services:
       DB_PASSWORD: adaptive_pw
       DB_NAME: adaptive_db
       DB_PORT: 3307
+      KAFKA_SERVER: kafka-server
+      KAFKA_PORT: 9092
+      KAFKA_TOPIC: eeg
+      KAFKA_DEBUG: "false"
       ENV: docker
-      MODEL_PATH: /resources/model.bin
+      MODELS_PATH: /resources
       DATABASE_UTILS_PATH: /resources/DatabaseUtils.props
       DEBUG_SECRET: adaptive_system
     ports:
