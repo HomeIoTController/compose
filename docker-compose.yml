@@ -17,15 +17,21 @@ services:
       context: ../graphql-api/.
     links:
       - graphql-db
+      - kafka_server
     depends_on:
       - graphql-db
       - eeg-brainwave-api
+      - kafka_server
     environment:
       DB_HOST: graphql-db
       DB_USERNAME: adaptive_user
       DB_PASSWORD: adaptive_pw
       DB_NAME: adaptive_db
       DB_PORT: 3306
+      KAFKA_SERVER: kafka_server
+      KAFKA_PORT: 9092
+      KAFKA_TOPIC: eeg
+      KAFKA_DEBUG: "false"
     ports:
       - "3000:3000"
     volumes:
@@ -84,3 +90,32 @@ services:
     volumes:
       - ../web-client:/app
     command: npm run start
+
+  kafka_server:
+    image: "spotify/kafka:latest"
+    container_name: kafka_server
+    hostname: kafka_server
+    ports:
+      - 2181:2181
+      - 9092:9092
+    environment:
+      ADVERTISED_HOST: kafka_server
+      ADVERTISED_PORT: 9092
+      AUTO_CREATE_TOPICS: "true"
+    command: >
+        bash -c
+        "(sleep 15s &&
+        /opt/kafka_2.11-0.10.1.0/bin/kafka-topics.sh
+        --create
+        --zookeeper
+        localhost:2181 --replication-factor 1 --partitions 1
+        --topic eeg &) && (supervisord -n)"
+  kafka_manager:
+    image: "mzagar/kafka-manager-docker:1.3.3.4"
+    container_name: kafka_manager
+    ports:
+      - 9000:9000
+    links:
+      - kafka_server
+    environment:
+      ZK_HOSTS: "kafka_server:2181"
