@@ -18,6 +18,7 @@ services:
     links:
       - graphql-db
       - kafka-server
+      - eeg-brainwave-api
     depends_on:
       - graphql-db
       - eeg-brainwave-api
@@ -28,6 +29,8 @@ services:
       DB_PASSWORD: adaptive_pw
       DB_NAME: adaptive_db
       DB_PORT: 3306
+      EEG_API: eeg-brainwave-api
+      EEG_API_PORT: 8080
       KAFKA_SERVER: kafka-server
       KAFKA_PORT: 9092
       KAFKA_TOPIC: eeg
