@@ -72,14 +72,14 @@ services:
       KAFKA_PORT: 9092
       KAFKA_TOPIC: eeg
       KAFKA_DEBUG: "false"
-      ENV: docker
-      MODELS_PATH: /resources
+      MODELS_PATH: /resources/classifiers
       DATABASE_UTILS_PATH: /resources/DatabaseUtils.props
       DEBUG_SECRET: adaptive_system
     ports:
       - "8080:8080" # For debugging
     volumes:
-      - ../eeg-brainwave-api/src/main/resources/model.bin:/model/model.bin
+      - ../eeg-brainwave-api/src/main/resources/DatabaseUtils.props:/resources/DatabaseUtils.props
+      - ./classifiers:/resources/classifiers/
   web:
     build:
       context: ../web-client/.
