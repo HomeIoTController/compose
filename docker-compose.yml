@@ -31,6 +31,8 @@ services:
       DB_PORT: 3306
       EEG_API: eeg-brainwave-api
       EEG_API_PORT: 8080
+      API_PORT: 3000
+      DEFAULT_LISTENER_COMMAND: hello
       KAFKA_SERVER: kafka-server
       KAFKA_PORT: 9092
       KAFKA_TOPIC: eeg
