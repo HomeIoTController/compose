@@ -86,7 +86,7 @@ services:
     volumes:
       - ../eeg-brainwave-api/src/main/resources/DatabaseUtils.props:/resources/DatabaseUtils.props
       - ./classifiers:/resources/classifiers/
-  web:
+  web-client:
     build:
       context: ../web-client/.
     links:
