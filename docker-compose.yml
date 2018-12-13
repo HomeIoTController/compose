@@ -98,7 +98,8 @@ services:
     ports:
       - "3001:3000"
     volumes:
-      - ../web-client:/app
+      - ../web-client/public:/app/public
+      - ../web-client/src:/app/src
       - ../web-client/node_modules
     command: npm run start
   zookeeper:

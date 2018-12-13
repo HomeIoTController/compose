@@ -14,6 +14,6 @@ rm -rf ./database-*
 rm -rf ./classifiers
 
 echo ">>> Creating application containers"
-docker-compose up -d --build
+docker-compose up -d --build --force-recreate
 
-cho ">>> Setup complete!"
+echo ">>> Setup complete!"
