@@ -1,29 +1,36 @@
-version: '2'
+version: '3'
 services:
   graphql-db:
-    image: mysql:5.6
+    image: danielmapar/mysql
+    # image: mysql:5.6
     ports:
       - '3306:3306'
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      resources:
+        limits:
+          cpus: "1"
+          memory: 10000M
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
       MYSQL_USER: adaptive_user
       MYSQL_PASSWORD: adaptive_pw
       MYSQL_DATABASE: adaptive_db
-    volumes:
-      - ./database-graphql/mysql:/var/lib/mysql
-      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    #volumes:
+    #  - ./database-graphql/mysql:/var/lib/mysql
+    #  - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     restart: always
+    networks:
+      - webnet
   graphql-api:
+    image: danielmapar/homecontroller_graphql-api
     build:
       context: ../graphql-api/.
-    links:
-      - graphql-db
-      - kafka-server
-      - eeg-brainwave-api
     depends_on:
       - graphql-db
       - eeg-brainwave-api
-      - kafka-server
+      - kafka-broker
     environment:
       DB_HOST: graphql-db
       DB_USERNAME: adaptive_user
@@ -34,7 +41,7 @@ services:
       EEG_API_PORT: 8080
       API_PORT: 3000
       DEFAULT_LISTENER_COMMAND: hello
-      KAFKA_SERVER: kafka-server
+      KAFKA_BROKER: kafka-broker
       KAFKA_PORT: 9092
       KAFKA_TOPIC: eeg
       KAFKA_DEBUG: "false"
@@ -46,12 +53,22 @@ services:
       - ../graphql-api/src:/app/src
       - ../graphql-api/migrations:/app/migrations
       - ../graphql-api/models:/app/models
-      - ../graphql-api/node_modules
+      #- ../graphql-api/node_modules
     command: npm run start
+    networks:
+      - webnet
   eeg-db:
-    image: mysql:8.0.13
+    image: danielmapar/mysql
+    # image: mysql:8.0.13
     ports:
       - '3307:3307'
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      resources:
+        limits:
+          cpus: "1"
+          memory: 10000M
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
       MYSQL_USER: adaptive_user
@@ -59,15 +76,16 @@ services:
       MYSQL_DATABASE: adaptive_db
       MYSQL_TCP_PORT: 3307
       MYSQL_UNIX_PORT: 3307
-    volumes:
-      - ./database-eeg/mysql:/var/lib/mysql
-      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    #volumes:
+      #- ./database-eeg/mysql:/var/lib/mysql
+      #- ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     restart: always
+    networks:
+      - webnet
   eeg-brainwave-api:
+    image: danielmapar/homecontroller_eeg-brainwave-api
     build:
       context: ../eeg-brainwave-api/.
-    links:
-      - eeg-db
     depends_on:
       - eeg-db
     environment:
@@ -76,7 +94,7 @@ services:
       DB_PASSWORD: adaptive_pw
       DB_NAME: adaptive_db
       DB_PORT: 3307
-      KAFKA_SERVER: kafka-server
+      KAFKA_BROKER: kafka-broker
       KAFKA_PORT: 9092
       KAFKA_TOPIC: eeg
       KAFKA_DEBUG: "false"
@@ -84,54 +102,41 @@ services:
       DATABASE_UTILS_PATH: /resources/DatabaseUtils.props
       DEBUG_SECRET: adaptive_system
     ports:
-      - "8081:8080" # For debugging
+      - "8085:8080" # For debugging using IntelliJ
     volumes:
       - ../eeg-brainwave-api/src/main/resources/DatabaseUtils.props:/resources/DatabaseUtils.props
       - ./classifiers:/resources/classifiers/
+    networks:
+      - webnet
   web-client:
+    image: danielmapar/homecontroller_web-client
     build:
       context: ../web-client/.
-    links:
-      - graphql-api
     depends_on:
       - graphql-api
     environment:
       PORT: '3000'
+      REACT_APP_GRAPHQL_API_URL: http://localhost:3000/graphql
     ports:
       - "3001:3000"
     volumes:
       - ../web-client/public:/app/public
       - ../web-client/src:/app/src
-      - ../web-client/node_modules
+      #- ../web-client/node_modules
     command: npm run start
-  zookeeper:
-    image: confluentinc/cp-zookeeper:4.0.1
-    hostname: zookeeper
+    networks:
+      - webnet
+  container-visualizer:
+    image: dockersamples/visualizer:stable
     ports:
-      - "2181:2181"
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-  kafka-server:
-    image: confluentinc/cp-enterprise-kafka:4.0.1
-    hostname: kafka-server
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-server:9092'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-  kafka-manager:
-    container_name: kafka-manager
-    image: thspinto/kafka-manager-docker
-    ports:
-      - "9000:9000"
-    environment:
-      ZK_HOSTS: zookeeper:2181
-      APPLICATION_SECRET: kafka-manager-secret
-    depends_on:
-      - kafka-server
+      - "9001:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - webnet
+
+networks:
+  webnet:

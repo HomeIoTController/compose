@@ -14,6 +14,6 @@ rm -rf ./database-*
 rm -rf ./classifiers
 
 echo ">>> Creating application containers"
-docker-compose up -d --build --force-recreate
+docker-compose -f docker-compose-kafka.yml -f docker-compose-apps.yml up -d --build --remove-orphans --force-recreate
 
 echo ">>> Setup complete!"
