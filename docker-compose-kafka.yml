@@ -58,7 +58,6 @@ services:
       - webnet
   kafka-topics-ui:
     image: landoop/kafka-topics-ui
-    container_name: kafka-topics-ui
     deploy:
       placement:
         constraints: [node.role == manager]

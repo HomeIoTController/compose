@@ -9,7 +9,7 @@ for app in graphql-api eeg-brainwave-client audio-client web-client eeg-brainwav
 done
 
 echo ">>> Destroying existent containers"
-docker-compose down --rmi all
+docker-compose -f docker-compose-kafka.yml -f docker-compose-apps.yml down --rmi all
 rm -rf ./database-*
 rm -rf ./classifiers
 

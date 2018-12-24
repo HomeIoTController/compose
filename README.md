@@ -41,12 +41,12 @@ This is the setup repository for the [Home Controller](https://github.com/HomeIo
 
 * To create a docker swarm locally, first create 2 VMs (master and node)
 
-  1. `docker-machine create --driver virtualbox --virtualbox-cpu-count "1" --virtualbox-disk-size "40000" --virtualbox-memory "4096" —-virtualbox-boot2docker-url "https://github.com/boot2docker/boot2docker/releases/download/v18.06.1-ce/boot2docker.iso" master`
+  1. `docker-machine create --driver virtualbox --virtualbox-cpu-count "1" --virtualbox-disk-size "40000" --virtualbox-memory "4096" --virtualbox-boot2docker-url "https://github.com/boot2docker/boot2docker/releases/download/v18.06.1-ce/boot2docker.iso" master`
 
     * We are setting up this VM with 40GB or hard drive, 1 CPU and 4GB os RAM memory
     * The image being used it `v18.06.1-ce`, and the reason for that can be found [here](https://github.com/docker/machine/issues/4608)
 
-  2. `docker-machine create --driver virtualbox --virtualbox-cpu-count "1" --virtualbox-disk-size "40000" --virtualbox-memory "4096" —-virtualbox-boot2docker-url "https://github.com/boot2docker/boot2docker/releases/download/v18.06.1-ce/boot2docker.iso" node`
+  2. `docker-machine create --driver virtualbox --virtualbox-cpu-count "1" --virtualbox-disk-size "40000" --virtualbox-memory "4096" --virtualbox-boot2docker-url "https://github.com/boot2docker/boot2docker/releases/download/v18.06.1-ce/boot2docker.iso" node`
 
 
 * After that, we will setup the swarm
@@ -64,12 +64,12 @@ This is the setup repository for the [Home Controller](https://github.com/HomeIo
   9. `exit`
   10. `eval $(docker-machine env master)`
     * We will setup the `master` vm as our current docker daemon instance
-  11. `docker stack deploy -c docker-compose.yml home_controller`
+  11. `./stack_deploy.sh`
 
 ## Debugging Docker Swarm
 
 * `docker stack ls`
-  * That should show a single stack with `home_controller` and `9` services
+  * That should show a single stack with `home_controller` and `10` services
 
 * `docker service ls`
   * That will list all services in execution
@@ -77,3 +77,7 @@ This is the setup repository for the [Home Controller](https://github.com/HomeIo
 * `docker service logs {Service_Name}`
   * Logs the output of a service
   * Example: `docker service logs home_controller_eeg-db`
+
+## Running the Load Balanced
+
+* `python3 scaler.py`
